@@ -13,6 +13,8 @@ cur.execute(
     )'''
 )
 
+cur.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_sig_desc ON signatures (hex_sig, description)")
+
 with open('file-signatures.json') as f:
     data = json.load(f);
 
@@ -29,7 +31,7 @@ for hex_string, info_list in data.items():
         des = item.get("description", "Unknown")
 
         cur.execute(
-            "INSERT INTO signatures (extension, description, hex_sig) VALUES (?, ?, ?)",
+            "INSERT OR IGNORE INTO signatures (extension, description, hex_sig) VALUES (?, ?, ?)",
             (ext, des, binary_sig)
         ) 
 
