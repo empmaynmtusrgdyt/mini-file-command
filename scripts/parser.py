@@ -1,8 +1,10 @@
 import json
 import sqlite3
 
-conn = sqlite3.connect('magic.db')
+conn = sqlite3.connect('data/magic.db')
 cur = conn.cursor()
+
+cur.execute("DROP TABLE IF EXISTS signatures")
 
 cur.execute(
     '''CREATE TABLE IF NOT EXISTS signatures(
@@ -15,7 +17,7 @@ cur.execute(
 
 cur.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_sig_desc ON signatures (hex_sig, description)")
 
-with open('file-signatures.json') as f:
+with open('data/file-signatures.json') as f:
     data = json.load(f);
 
 for hex_string, info_list in data.items():

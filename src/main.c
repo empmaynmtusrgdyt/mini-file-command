@@ -51,7 +51,7 @@ int main(int argc, char *argv[]){
 
     strncpy(path, argv[1], MAX - 1);
 
-    result = sqlite3_open("magic.db", &db);
+    result = sqlite3_open("data/magic.db", &db);
     if(result != SQLITE_OK){
         printf("ERROR: Ошибка открытия базы данных");
         return 2;
