@@ -38,7 +38,7 @@ mini-file-command.exe [ФАЙЛ]
 ├── data/
 │   └── file-signatures.json  # база сигнатур
 ├── scripts/
-│   ├── parser.py       # скрипт создания БД из JSON
+│   ├── parser.py             # скрипт создания БД из JSON
 │   ├── build-and-run-unix.sh # скрипт для запуска под Linux/macOS
 │   └── build-and-run-win.bat # скрипт для запуска под Windows
 ├── AUTHORS
