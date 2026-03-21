@@ -56,24 +56,6 @@ int main(int argc, char *argv[]){
         printf("ERROR: Ошибка открытия базы данных");
         return 2;
     }
-    
-    /*result = printf("Введите путь к файлу: ");
-    if(result < 0){
-        printf("ERROR: Ошибка вывода");
-        exit_code = 3;
-        goto close_bd_and_file;
-    }
-
-    if(fgets(path, MAX, stdin) == NULL){
-        printf("ERROR: Ошибка ввода");
-        exit_code = 4;
-        goto close_bd_and_file;
-    }
-
-    size_t len = strlen(path);
-    if(len > 0 && path[len - 1] == '\n'){
-        path[len - 1] = '\0';
-    }*/
 
     f = fopen(path, "rb");
     if(f == NULL){
@@ -88,10 +70,6 @@ int main(int argc, char *argv[]){
         exit_code = 4;
         goto close_bd_and_file;
     }
-
-    /*for(size_t i = 0; i < result_2; i++){
-        printf("%X", buffer[i]);
-    }*/
 
     char *sql = "SELECT description, extension FROM signatures WHERE hex_sig = substr(?, 1, length(hex_sig)) LIMIT 1";
     result = sqlite3_prepare_v2(db, sql, -1, &stmt, 0);
@@ -162,3 +140,5 @@ int main(int argc, char *argv[]){
 // Ну вроде работает
 
 // Ну вроде все, тестим
+
+// Остался только README
