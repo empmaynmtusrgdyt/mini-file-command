@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sqlite3.h>
-// заголовочные файлы
 
 #ifdef _WIN32
     #include <Windows.h>
@@ -11,29 +10,27 @@
     #include <limits.h>
     #define MAX_PATH_LEN PATH_MAX
 #endif
-// подключение определенных заголовочных файлов в зависимости от платформы
 
 #define PROGRAM_NAME "mini-file-command"
 #define PROGRAM_VERSION "2.0.0"
-// имя и версия программы
 
 
 int main(int argc, char *argv[]){
-    int exit_code = 0; // стастус-код
-    sqlite3 *db = NULL; // подключение к бд
-    int result = 0; // переменная дла вских проверок
-    size_t result_2 = 0; // еще одна переменная для всяких проверок
-    char path[MAX_PATH_LEN] = {0}; // тут будет лежать путь, скопированный из аргумента командной строки
-    FILE * f = NULL; // ну тут понятно
-    //unsigned char buffer[16] = {0};
-    sqlite3_stmt *stmt = NULL; // херня для запросов
+    int exit_code = 0;
+    sqlite3 *db = NULL;
+    int result = 0;
+    size_t result_2 = 0;
+    char path[MAX_PATH_LEN] = {0};
+    FILE * f = NULL;
+    sqlite3_stmt *stmt = NULL;
+    unsigned char first_bytes[8192];
+    int flag = 0;
 
     if(argc != 2){
         printf("ERROR: Ошибка количества аргументов\n");
         printf("Введите ./mini-file-command --help для справки\n");
         return 1;
     }
-    // проверка что аргументов может быть только два
 
     if((strcmp(argv[1], "--version")) == 0 || (strcmp(argv[1], "-v")) == 0){
         printf("%s %s\n", PROGRAM_NAME, PROGRAM_VERSION);
@@ -44,7 +41,6 @@ int main(int argc, char *argv[]){
         printf("Written by Marth Scoobert\n");
         return 0;
     }
-    // вывод версии
 
     if((strcmp(argv[1], "--help")) == 0 || (strcmp(argv[1], "-h")) == 0){
         printf("Usage: %s [OPTION] [FILE]\n", PROGRAM_NAME);
@@ -61,18 +57,15 @@ int main(int argc, char *argv[]){
         printf("Report bugs to leammax@yandex.ru\n");
         return 0;
     }
-    // вывод хелпы
 
     strncpy(path, argv[1], MAX_PATH_LEN - 1);
     path[MAX_PATH_LEN - 1] = '\0';
-    // копирование аргумента в перменную path
 
     result = sqlite3_open("data/magic.db", &db);
     if(result != SQLITE_OK){
         printf("ERROR: Ошибка открытия базы данных");
         return 2;
     }
-    // открытие бд
 
     f = fopen(path, "rb");
     if(f == NULL){
@@ -80,31 +73,26 @@ int main(int argc, char *argv[]){
         exit_code = 3;
         goto close_bd_and_file;
     }
-    // открытие файла как бинарного
 
-// =================================================================================
-
-    unsigned char first_bytes[8192]; // массив куда буду читать первые 8 кб файла
     for(size_t i = 0; i < (sizeof(first_bytes) / sizeof(first_bytes[0])); i++){
         result = fgetc(f);
         if(result == EOF){
-            exit_code = 3;
+            printf("ERROR: Ошибка чтения данных из файла");
+            exit_code = 4;
             goto close_bd_and_file;
         }
         first_bytes[i] = result;
     }
-    // тут этот массив просто заполняется
 
-    char *sql = "SELECT hex_sig, sig_length, offset, trailer, extension, description FROM signatures"; // запрос
-    result = sqlite3_prepare_v2(db, sql, -1, &stmt, 0); // подготовка запроса к выполнению
+    char *sql = "SELECT hex_sig, sig_length, offset, trailer, extension, description FROM signatures ORDER BY sig_length DESC";
+    result = sqlite3_prepare_v2(db, sql, -1, &stmt, 0);
     if(result != SQLITE_OK){
         printf("ERROR: Ошибка работы базы данных");
         exit_code = 5;
         goto close_bd_and_file;
     }
-    // проверка
 
-    while(sqlite3_step(stmt) == SQLITE_ROW){ // до тех пор пока есть строки
+    while(sqlite3_step(stmt) == SQLITE_ROW){
         const void * hex_sig = sqlite3_column_blob(stmt, 0);
         int sig_length = sqlite3_column_int(stmt, 1);
         int offset = sqlite3_column_int(stmt, 2);
@@ -112,72 +100,75 @@ int main(int argc, char *argv[]){
         int trailer_length = sqlite3_column_bytes(stmt, 3);
         const unsigned char * ext = sqlite3_column_text(stmt, 4);
         const unsigned char * desc = sqlite3_column_text(stmt, 5);
-        // вытягиваем из бд всю инфу построчно
 
-        if(offset + sig_length > (sizeof(first_bytes) / sizeof(first_bytes[0]))) continue; // проверка: помещяется ли вся сигнатура в first_bytes
-        unsigned char newww[sig_length]; // новый массив с размером равный длине нашей текущей сигнатуры
-        memcpy(newww, &first_bytes[offset], sig_length); // копировние -> (куда?, с какого элемента?, сколько?)
-        size_t count_of_true_md_flg = 0; // это что-то типа флага для проверки
+        if(offset + sig_length > (sizeof(first_bytes) / sizeof(first_bytes[0]))) continue;
+        unsigned char offset_bytes[sig_length];
+        memcpy(offset_bytes, &first_bytes[offset], sig_length);
+        size_t flag_for_sig_length = 0;
 
         for(size_t i = 0; i < sig_length; i++){
-            if(((unsigned char *)hex_sig)[i] != newww[i]){
+            if(((unsigned char *)hex_sig)[i] != offset_bytes[i]){
                 break;
             }
-            else count_of_true_md_flg++;
+            else flag_for_sig_length++;
         }
 
-        if(count_of_true_md_flg != sig_length) continue;
+        if(flag_for_sig_length != sig_length) continue;
         if(trailer != NULL && trailer_length > 0){
             long current_position = ftell(f);
             if(current_position == -1){
-                // ошибка
+                printf("ERROR: Ошибка при работе с трейлером");
+                continue;
             }
             result = fseek(f, -trailer_length, SEEK_END);
             if(result != 0){
-                // ошибка 
+                printf("ERROR: Ошибка при работе с трейлером");
+                result = fseek(f, current_position, SEEK_SET);
+                if(result != 0){
+                    printf("ERROR: Ошибка при работе с трейлером");
+                    continue;
+                }
+                continue;
             }
             unsigned char file_trailer[trailer_length];
             result_2 = fread(file_trailer, sizeof(unsigned char), trailer_length, f);
             if(result_2 != trailer_length){
-                // ошибка
-            }
-            result = fseek(f, current_position, SEEK_SET);
-            if(result != 0){
-                // ошибка 
-            }
-            if(memcpy(trailer, file_trailer, trailer_length) != 0){
+                printf("ERROR: Ошибка при работе с трейлером");
                 result = fseek(f, current_position, SEEK_SET);
                 if(result != 0){
-                    // ошибка 
+                    printf("ERROR: Ошибка при работе с трейлером");
+                    continue;
                 }
                 continue;
             }
             result = fseek(f, current_position, SEEK_SET);
             if(result != 0){
-                // ошибка 
+                printf("ERROR: Ошибка при работе с трейлером");
+                continue;
+            }
+            if(memcmp(trailer, file_trailer, trailer_length) != 0){
+                result = fseek(f, current_position, SEEK_SET);
+                if(result != 0){
+                    printf("ERROR: Ошибка при работе с трейлером");
+                    continue;
+                }
+                continue;
+            }
+            result = fseek(f, current_position, SEEK_SET);
+            if(result != 0){
+                continue;
             }
 
         }
-        // вывод всего
-    }
-    
-// =================================================================================
-
-    result = sqlite3_step(stmt);
-    if(result == SQLITE_ROW){
-        const unsigned char *desc = sqlite3_column_text(stmt, 0);
-        const unsigned char *ext = sqlite3_column_text(stmt, 1);
-
-        printf("Тип файла определен\n");
+        flag = 1;
         printf("Описание: %s\n", desc);
         printf("Расширение: %s\n", ext);
+        break;
     }
-    else if(result == SQLITE_DONE){
+
+    if(flag == 0){
         printf("Тип файла не определен. Нет совпадений в базе\n");
-    }
-    else{
-        printf("ERROR: Ошибка поиска в базе данных");
-        exit_code = 7;
+        exit_code = 6;
         goto close_bd_and_file;
     }
 
@@ -201,6 +192,7 @@ int main(int argc, char *argv[]){
         }
         return exit_code;
 }
+
 
 // TODO: добавить парсинг аргументов командой строки + флаги (--version --help)
 // Ладно, окей, это оказалось сложнее чем я думал

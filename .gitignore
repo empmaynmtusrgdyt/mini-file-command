@@ -2,5 +2,6 @@ mini-file-command
 mini-file-command.exe
 
 data/magic.db
+data/file-sigantures.json
 
 .DS_Store
