@@ -14,6 +14,40 @@
 #define PROGRAM_NAME "mini-file-command"
 #define PROGRAM_VERSION "2.0.0"
 
+int check_trailer(FILE *f, const void *trailer, int len) {
+    if (!trailer || len == 0) return 1;
+    
+    long pos = ftell(f);
+    if (pos < 0) return 0;
+    
+    fseek(f, 0, SEEK_END);
+    long size = ftell(f);
+    
+    if (size < len) {
+        fseek(f, pos, SEEK_SET);
+        return 0;
+    }
+    
+    int extra = 20;
+    int read = len + extra;
+    if (read > size) read = size;
+    
+    fseek(f, -read, SEEK_END);
+    unsigned char buf[read];
+    fread(buf, 1, read, f);
+    
+    int ok = 0;
+    for (int i = 0; i <= extra && i <= read - len; i++) {
+        if (memcmp(trailer, buf + read - len - i, len) == 0) {
+            ok = 1;
+            break;
+        }
+    }
+    
+    fseek(f, pos, SEEK_SET);
+    return ok;
+}
+
 
 int main(int argc, char *argv[]){
     int exit_code = 0;
@@ -84,7 +118,7 @@ int main(int argc, char *argv[]){
         first_bytes[i] = result;
     }
 
-    char *sql = "SELECT hex_sig, sig_length, offset, trailer, extension, description FROM signatures ORDER BY sig_length DESC";
+    char *sql = "SELECT hex_sig, sig_length, offset, trailer, extension, description FROM signatures WHERE sig_length >= 2 ORDER BY sig_length DESC";
     result = sqlite3_prepare_v2(db, sql, -1, &stmt, 0);
     if(result != SQLITE_OK){
         printf("ERROR: Ошибка работы базы данных");
@@ -114,51 +148,8 @@ int main(int argc, char *argv[]){
         }
 
         if(flag_for_sig_length != sig_length) continue;
-        if(trailer != NULL && trailer_length > 0){
-            long current_position = ftell(f);
-            if(current_position == -1){
-                printf("ERROR: Ошибка при работе с трейлером");
-                continue;
-            }
-            result = fseek(f, -trailer_length, SEEK_END);
-            if(result != 0){
-                printf("ERROR: Ошибка при работе с трейлером");
-                result = fseek(f, current_position, SEEK_SET);
-                if(result != 0){
-                    printf("ERROR: Ошибка при работе с трейлером");
-                    continue;
-                }
-                continue;
-            }
-            unsigned char file_trailer[trailer_length];
-            result_2 = fread(file_trailer, sizeof(unsigned char), trailer_length, f);
-            if(result_2 != trailer_length){
-                printf("ERROR: Ошибка при работе с трейлером");
-                result = fseek(f, current_position, SEEK_SET);
-                if(result != 0){
-                    printf("ERROR: Ошибка при работе с трейлером");
-                    continue;
-                }
-                continue;
-            }
-            result = fseek(f, current_position, SEEK_SET);
-            if(result != 0){
-                printf("ERROR: Ошибка при работе с трейлером");
-                continue;
-            }
-            if(memcmp(trailer, file_trailer, trailer_length) != 0){
-                result = fseek(f, current_position, SEEK_SET);
-                if(result != 0){
-                    printf("ERROR: Ошибка при работе с трейлером");
-                    continue;
-                }
-                continue;
-            }
-            result = fseek(f, current_position, SEEK_SET);
-            if(result != 0){
-                continue;
-            }
-
+        if (!check_trailer(f, trailer, trailer_length)){
+            continue;
         }
         flag = 1;
         printf("Описание: %s\n", desc);
