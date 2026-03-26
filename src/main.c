@@ -109,6 +109,7 @@ int main(int argc, char *argv[]){
         int sig_length = sqlite3_column_int(stmt, 1);
         int offset = sqlite3_column_int(stmt, 2);
         const void * trailer = sqlite3_column_blob(stmt, 3);
+        int trailer_length = sqlite3_column_bytes(stmt, 3);
         const unsigned char * ext = sqlite3_column_text(stmt, 4);
         const unsigned char * desc = sqlite3_column_text(stmt, 5);
         // вытягиваем из бд всю инфу построчно
@@ -125,34 +126,42 @@ int main(int argc, char *argv[]){
             else count_of_true_md_flg++;
         }
 
-        if(count_of_true_md_flg == sig_length){
-            // ну и тут еще нужно сделать проверку окончания файла
-            break;
+        if(count_of_true_md_flg != sig_length) continue;
+        if(trailer != NULL && trailer_length > 0){
+            long current_position = ftell(f);
+            if(current_position == -1){
+                // ошибка
+            }
+            result = fseek(f, -trailer_length, SEEK_END);
+            if(result != 0){
+                // ошибка 
+            }
+            unsigned char file_trailer[trailer_length];
+            result_2 = fread(file_trailer, sizeof(unsigned char), trailer_length, f);
+            if(result_2 != trailer_length){
+                // ошибка
+            }
+            result = fseek(f, current_position, SEEK_SET);
+            if(result != 0){
+                // ошибка 
+            }
+            if(memcpy(trailer, file_trailer, trailer_length) != 0){
+                result = fseek(f, current_position, SEEK_SET);
+                if(result != 0){
+                    // ошибка 
+                }
+                continue;
+            }
+            result = fseek(f, current_position, SEEK_SET);
+            if(result != 0){
+                // ошибка 
+            }
+
         }
+        // вывод всего
     }
     
-
-    result_2 = fread(buffer, sizeof(char), 16, f);
-    if(result_2 <= 0){
-        printf("ERROR: Ошибка чтения данных из файла");
-        exit_code = 4;
-        goto close_bd_and_file;
-    }
-
-    char *sql = "SELECT description, extension FROM signatures WHERE hex_sig = substr(?, 1, length(hex_sig)) LIMIT 1";
-    result = sqlite3_prepare_v2(db, sql, -1, &stmt, 0);
-    if(result != SQLITE_OK){
-        printf("ERROR: Ошибка работы базы данных");
-        exit_code = 5;
-        goto close_bd_and_file;
-    }
-
-    result = sqlite3_bind_blob(stmt, 1, buffer, 16, SQLITE_STATIC);
-    if(result != SQLITE_OK){
-        printf("ERROR: Ошибка привзяки BLOB");
-        exit_code = 6;
-        goto close_bd_and_file;
-    }
+// =================================================================================
 
     result = sqlite3_step(stmt);
     if(result == SQLITE_ROW){
@@ -232,3 +241,5 @@ int main(int argc, char *argv[]){
 // Ладно, надо жестко комментарии пописать, а то что-то я туплю
 
 // TODO: проверить выполнены ли все проверки; дописать комменты; поправить статус-коды
+
+// Ну я вроде дописал. Теперь надо удалить ненужные куски, убрать все лишнее и протестить 
