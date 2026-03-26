@@ -36,7 +36,7 @@ mini-file-command.exe [ФАЙЛ]
 │   ├── sqlite3.c       # исходный код SQLite
 │   └── sqlite3.h       # заголовочный файл SQLite
 ├── data/
-│   └── file-signatures.json  # база сигнатур
+│   └── file_sigs.json  # база сигнатур
 ├── scripts/
 │   ├── parser.py             # скрипт создания БД из JSON
 │   ├── build-and-run-unix.sh # скрипт для запуска под Linux/macOS
@@ -50,7 +50,7 @@ mini-file-command.exe [ФАЙЛ]
 ## Используемые компоненты
 
 - `src/sqlite3.c`, `src/sqlite3.h` — [SQLite amalgamation](https://www.sqlite.org/amalgamation.html)
-- `data/file-signatures.json` — [file-signatures.json](https://github.com/s0md3v/dump/blob/master/static/file-signatures.json)
+- `data/file_sigs.json` — [GCK's File Signature Table](https://github.com/toreaurstadboss/FileHeaderUtil/blob/main/file_sigs.json)
 
 ## Лицензия
 
