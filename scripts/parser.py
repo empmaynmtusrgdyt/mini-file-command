@@ -12,12 +12,13 @@ cur.execute(
         extension TEXT,
         description TEXT,
         hex_sig BLOB, 
+        sig_length INTEGER,
         offset INTEGER DEFAULT 0,
         trailer BLOB
     )'''
 )
 
-cur.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_sig_full ON signatures (hex_sig, offset, trailer, description, extension)")
+cur.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_sig_full ON signatures (hex_sig, sig_length, offset, trailer, description, extension)")
 
 def hex_to_bytes(hex_string):
     if not hex_string: return None
@@ -62,9 +63,11 @@ for entry in data.get("filesigs", []):
     trailer_hex = entry.get("Trailer (hex)", "(null)")
     trailer_bytes = hex_to_bytes(trailer_hex)
 
+    sig_length = len(binary_sig)
+
     for ext in extensions:
-        cur.execute("INSERT OR IGNORE INTO signatures (extension, description, hex_sig, offset, trailer) VALUES (?, ?, ?, ?, ?)",
-                    (ext, description, binary_sig, offset, trailer_bytes))
+        cur.execute("INSERT OR IGNORE INTO signatures (extension, description, hex_sig, sig_length, offset, trailer) VALUES (?, ?, ?, ?, ?, ?)",
+                    (ext, description, binary_sig, sig_length, offset, trailer_bytes))
 
 conn.commit()
 conn.close()
