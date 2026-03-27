@@ -69,17 +69,17 @@
       "Trailer (hex)": "(null)"
       },
       {
-      "File description": "MPEG-4 video_1",
-      "Header (hex)": "00 00 00 18 66 74 79 70",
-      "File extension": "3GP5|M4V|MP4",
+      "File description": "MPEG-4 video_2",
+      "Header (hex)": "00 00 00 1C 66 74 79 70",
+      "File extension": "MP4",
       "FileClass": "Multimedia",
       "Header offset": "0",
       "Trailer (hex)": "(null)"
       },
       {
-      "File description": "MPEG-4 video_2",
-      "Header (hex)": "00 00 00 1C 66 74 79 70",
-      "File extension": "MP4",
+      "File description": "MPEG-4 video_1",
+      "Header (hex)": "00 00 00 18 66 74 79 70",
+      "File extension": "3GP5|M4V|MP4",
       "FileClass": "Multimedia",
       "Header offset": "0",
       "Trailer (hex)": "(null)"
@@ -1229,14 +1229,6 @@
       "Trailer (hex)": "7E 3E 0A"
       },
       {
-      "File description": "Quatro Pro for Windows 7.0",
-      "Header (hex)": "3E 00 03 00 FE FF 09 00 06",
-      "File extension": "WB3",
-      "FileClass": "Spreadsheet",
-      "Header offset": "24",
-      "Trailer (hex)": "(null)"
-      },
-      {
       "File description": "Windows Help file_2",
       "Header (hex)": "3F 5F 03 00",
       "File extension": "GID|HLP",
@@ -2327,7 +2319,7 @@
       {
       "File description": "Windows-DOS executable file",
       "Header (hex)": "4D 5A",
-      "File extension": "COM|DLL|DRV|EXE|PIF|QTS|QTX|SYS",
+      "File extension": "EXE|DLL|SYS|PIF|QTS|QTX|COM|DRV|",
       "FileClass": "Windows",
       "Header offset": "0",
       "Trailer (hex)": "(null)"
@@ -2424,14 +2416,6 @@
       "File description": "Audition graphic filter",
       "Header (hex)": "4D 5A 90 00 03 00 00 00",
       "File extension": "FLT",
-      "FileClass": "Miscellaneous",
-      "Header offset": "0",
-      "Trailer (hex)": "(null)"
-      },
-      {
-      "File description": "ZoneAlam data file",
-      "Header (hex)": "4D 5A 90 00 03 00 00 00 04 00 00 00 FF FF",
-      "File extension": "ZAP",
       "FileClass": "Miscellaneous",
       "Header offset": "0",
       "Trailer (hex)": "(null)"
@@ -2613,12 +2597,12 @@
       "Trailer (hex)": "(null)"
       },
       {
-      "File description": "PKZIP archive_1",
+      "File description": "MS Office Open XML Format Document",
       "Header (hex)": "50 4B 03 04",
-      "File extension": "ZIP",
-      "FileClass": "Compressed archive",
+      "File extension": "DOCX or PPTX or XLSX",
+      "FileClass": "Word processing suite",
       "Header offset": "0",
-      "Trailer (hex)": "50 4B ????????????????? 00 00 00"
+      "Trailer (hex)": "(null)"
       },
       {
       "File description": "Android package",
@@ -2633,14 +2617,6 @@
       "Header (hex)": "50 4B 03 04",
       "File extension": "ZIP",
       "FileClass": "MacOS",
-      "Header offset": "0",
-      "Trailer (hex)": "(null)"
-      },
-      {
-      "File description": "MS Office Open XML Format Document",
-      "Header (hex)": "50 4B 03 04",
-      "File extension": "DOCX|PPTX|XLSX",
-      "FileClass": "Word processing suite",
       "Header offset": "0",
       "Trailer (hex)": "(null)"
       },
@@ -4805,14 +4781,6 @@
       "Trailer (hex)": "(null)"
       },
       {
-      "File description": "Windows executable",
-      "Header (hex)": "FF",
-      "File extension": "SYS",
-      "FileClass": "Windows",
-      "Header offset": "0",
-      "Trailer (hex)": "(null)"
-      },
-      {
       "File description": "Works for Windows spreadsheet",
       "Header (hex)": "FF 00 02 00 04 04 05 54",
       "File extension": "WKS",
@@ -4855,7 +4823,7 @@
       {
       "File description": "Generic JPEG Image file",
       "Header (hex)": "FF D8",
-      "File extension": "JPE|JPEG|JPG",
+      "File extension": "JPG|JPEG",
       "FileClass": "Picture",
       "Header offset": "0",
       "Trailer (hex)": "FF D9"

@@ -118,7 +118,8 @@ int main(int argc, char *argv[]){
         first_bytes[i] = result;
     }
 
-    char *sql = "SELECT hex_sig, sig_length, offset, trailer, extension, description FROM signatures WHERE sig_length >= 2 ORDER BY sig_length DESC";
+    char *sql = "SELECT hex_sig, sig_length, offset, trailer, extension, description FROM signatures";
+    // WHERE sig_length >= 2 ORDER BY sig_length DESC
     result = sqlite3_prepare_v2(db, sql, -1, &stmt, 0);
     if(result != SQLITE_OK){
         printf("ERROR: Ошибка работы базы данных");
@@ -225,4 +226,8 @@ int main(int argc, char *argv[]){
 
 // TODO: проверить выполнены ли все проверки; дописать комменты; поправить статус-коды
 
-// Ну я вроде дописал. Теперь надо удалить ненужные куски, убрать все лишнее и протестить 
+// Ну я вроде дописал. Теперь надо удалить ненужные куски, убрать все лишнее и протестить
+
+// Хочется еще json чуть-чуть поправить
+
+// Надо протестировать с разными форматами (сейчас сделаю)
