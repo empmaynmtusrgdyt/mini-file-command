@@ -14,38 +14,68 @@
 #define PROGRAM_NAME "mini-file-command"
 #define PROGRAM_VERSION "2.0.0"
 
-int check_trailer(FILE *f, const void *trailer, int len) {
-    if (!trailer || len == 0) return 1;
+int check_trailer(FILE * f, const void * trailer, int len_of_trailer){
+    int mini_result;
+    size_t mini_result_2;
+
+    if(trailer == NULL || len_of_trailer == 0) return 0; // успешное завершение
     
-    long pos = ftell(f);
-    if (pos < 0) return 0;
+    long position = ftell(f);
+    if(position < 0){
+        printf("Ошибка внутри функции в определении позиции");
+        return 1;
+    }
     
-    fseek(f, 0, SEEK_END);
-    long size = ftell(f);
+    mini_result = fseek(f, 0, SEEK_END);
+    if(mini_result != 0){
+        printf("Ошибка внутри функции в перемещении в конец файла");
+        return 1;
+    }
+
+    long filesize = ftell(f); // размер файла
     
-    if (size < len) {
-        fseek(f, pos, SEEK_SET);
-        return 0;
+    if (filesize < len_of_trailer){
+        mini_result = fseek(f, position, SEEK_SET);
+        if(mini_result != 0){
+            printf("Ошибка внутри функции в восстановлении позиции");
+            return 1;
+        }
+        printf("Ошибка внутри функции в размере файла");
+        return 1;
     }
     
     int extra = 20;
-    int read = len + extra;
-    if (read > size) read = size;
+    int read = len_of_trailer + extra;
+    if (read > filesize) read = filesize;
     
-    fseek(f, -read, SEEK_END);
-    unsigned char buf[read];
-    fread(buf, 1, read, f);
+    mini_result = fseek(f, -read, SEEK_END);
+    if(mini_result != 0){
+        printf("Ошибка внутри функции в перемещении");
+        return 1;
+    }
+
+    unsigned char buffer[read];
+    mini_result_2 = fread(buffer, sizeof(unsigned char), read, f);
+    if(mini_result_2 != read){
+        printf("Ошибка внутри функции в чтении байтов из файла");
+        return 1;
+    }
     
     int ok = 0;
-    for (int i = 0; i <= extra && i <= read - len; i++) {
-        if (memcmp(trailer, buf + read - len - i, len) == 0) {
+    for (int i = 0; i <= extra && i <= read - len_of_trailer; i++) {
+        if (memcmp(trailer, buffer + read - len_of_trailer - i, len_of_trailer) == 0) {
             ok = 1;
             break;
         }
     }
     
-    fseek(f, pos, SEEK_SET);
-    return ok;
+    mini_result = fseek(f, position, SEEK_SET);
+    if(mini_result != 0){
+        printf("Ошибка внутри функции в восстановлении позиции");
+        return 1;
+    }
+    if(ok == 0) return 1;
+    else return 0;
 }
 
 
@@ -149,7 +179,7 @@ int main(int argc, char *argv[]){
         }
 
         if(flag_for_sig_length != sig_length) continue;
-        if (!check_trailer(f, trailer, trailer_length)){
+        if (check_trailer(f, trailer, trailer_length) != 0){
             continue;
         }
         flag = 1;
@@ -231,3 +261,5 @@ int main(int argc, char *argv[]){
 // Хочется еще json чуть-чуть поправить
 
 // Надо протестировать с разными форматами (сейчас сделаю)
+
+// Так, теперь надо еще раз пройтись по всем файлам и все подправить/проверить
