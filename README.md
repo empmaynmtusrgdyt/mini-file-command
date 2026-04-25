@@ -53,7 +53,7 @@ mini-file-command.exe [ФАЙЛ]
 
 - `src/sqlite3.c`, `src/sqlite3.h` — [SQLite amalgamation](https://www.sqlite.org/amalgamation.html)
 - `data/file_sigs.json` — [GCK's File Signature Table](https://github.com/toreaurstadboss/FileHeaderUtil/blob/main/file_sigs.json)
-- `src/cJSON.c`, `src/cJSON.h` - [cJSON](https://github.com/DaveGamble/cJSON)
+- `src/cJSON.c`, `src/cJSON.h` — [cJSON](https://github.com/DaveGamble/cJSON)
 
 ## Лицензия
 
