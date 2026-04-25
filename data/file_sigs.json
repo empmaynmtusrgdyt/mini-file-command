@@ -2254,7 +2254,7 @@
       },
       {
       "File description": "Health Level-7 data (pipe delimited) file",
-      "Header (hex)": "D 53 48 7C 5E 7E 5C 26 7C",
+      "Header (hex)": "4D 53 48 7C 5E 7E 5C 26 7C",
       "File extension": "HL7",
       "FileClass": "Programming",
       "Header offset": "0",
