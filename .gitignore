@@ -1,5 +1,9 @@
 mini-file-command
 mini-file-command.exe
+parser_c
+parser_c.exe
+
+parser.py
 
 data/magic.db
 data/file-sigantures.json
