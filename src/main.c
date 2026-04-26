@@ -12,7 +12,7 @@
 #endif
 
 #define PROGRAM_NAME "mini-file-command"
-#define PROGRAM_VERSION "2.0.0"
+#define PROGRAM_VERSION "3.0.0"
 
 
 int check_trailer(FILE * f, const void * trailer, int len_of_trailer){
