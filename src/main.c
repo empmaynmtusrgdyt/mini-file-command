@@ -200,18 +200,18 @@ int main(int argc, char *argv[]){
             result = fclose(f);
             if(result != 0){
                 printf("ERROR: Ошибка закрытия файла");
-                exit_code = 8;
+                exit_code = 7;
             }
         }
         result = sqlite3_finalize(stmt);
         if(result != SQLITE_OK){
             printf("ERROR: Ошибка очистки");
-            exit_code = 9;
+            exit_code = 8;
         }
         result = sqlite3_close(db);
         if(result != SQLITE_OK){
             printf("ERROR: Ошибка закрытия базы данных");
-            exit_code = 10;
+            exit_code = 9;
         }
         return exit_code;
 }
